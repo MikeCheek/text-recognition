@@ -9,15 +9,53 @@ const App = () => {
   const [captured, setCaptured] = useState<string[]>([]);
   const [status, setStatus] = useState<string>('');
   const [progress, setProgress] = useState<number>(0);
+  const [cameras, setCameras] = useState<{ name: string; id: string }[]>([]);
+  const [stream, setStream] = useState<MediaStream>();
+  const [selected, setSelected] = useState<string>('');
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then(gotDevices);
+  }, []);
+
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
+    }
+  }, [stream]);
 
   useEffect(() => {
     const video = videoRef.current;
     if (video)
-      navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-        video.srcObject = stream;
-        video.play();
-      });
-  }, []);
+      navigator.mediaDevices
+        .getUserMedia({
+          video: selected === '' ? { facingMode: 'environment' } : { deviceId: { exact: selected } },
+          audio: false,
+        })
+        .then((stream) => {
+          setStream(stream);
+        });
+  }, [selected]);
+
+  const gotDevices = (mediaDevices: MediaDeviceInfo[]) => {
+    let count = 1;
+    mediaDevices.forEach((mediaDevice) => {
+      if (mediaDevice.kind === 'videoinput')
+        setCameras((arr) => [...arr, { name: mediaDevice.label || `Camera ${count++}`, id: mediaDevice.deviceId }]);
+    });
+  };
+  function stopMediaTracks(s: MediaStream) {
+    s.getTracks().forEach((track) => {
+      track.stop();
+    });
+  }
+
+  const changeCamera = (id: string) => {
+    if (typeof stream !== 'undefined') {
+      stopMediaTracks(stream);
+    }
+    setSelected(id);
+  };
 
   // Funzione per identificare il testo nell'immagine utilizzando Tesseract.js
   async function detectText(image: string) {
@@ -57,6 +95,13 @@ const App = () => {
       <header className="App-header">
         <div className="info">
           <p>Status: {status}</p>
+          <select>
+            {cameras.map((camera, key) => (
+              <option key={key} onClick={() => changeCamera(camera.id)}>
+                {camera.name}
+              </option>
+            ))}
+          </select>
           <progress value={progress} />
         </div>
         <button onClick={main}>Capture</button>

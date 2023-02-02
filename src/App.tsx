@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import './App.css';
 import * as Tesseract from 'tesseract.js';
+import './App.css';
 
 const App = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -10,8 +10,8 @@ const App = () => {
   const [status, setStatus] = useState<string>('');
   const [progress, setProgress] = useState<number>(0);
   const [cameras, setCameras] = useState<{ name: string; id: string }[]>([]);
-  const [stream, setStream] = useState<MediaStream>();
   const [selected, setSelected] = useState<string>('');
+  const [stream, setStream] = useState<MediaStream>();
 
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then(gotDevices);
@@ -37,6 +37,10 @@ const App = () => {
         });
   }, [selected]);
 
+  useEffect(() => {
+    if (cameras.length > 0) setSelected(cameras[0].id);
+  }, [cameras]);
+
   const gotDevices = (mediaDevices: MediaDeviceInfo[]) => {
     let count = 1;
     mediaDevices.forEach((mediaDevice) => {
@@ -44,11 +48,11 @@ const App = () => {
         setCameras((arr) => [...arr, { name: mediaDevice.label || `Camera ${count++}`, id: mediaDevice.deviceId }]);
     });
   };
-  function stopMediaTracks(s: MediaStream) {
+  const stopMediaTracks = (s: MediaStream) => {
     s.getTracks().forEach((track) => {
       track.stop();
     });
-  }
+  };
 
   const changeCamera = (id: string) => {
     if (typeof stream !== 'undefined') {
@@ -57,9 +61,7 @@ const App = () => {
     setSelected(id);
   };
 
-  // Funzione per identificare il testo nell'immagine utilizzando Tesseract.js
-  async function detectText(image: string) {
-    // Usa la libreria Tesseract.js per identificare il testo nell'immagine
+  const detectText = async (image: string) => {
     const text = await Tesseract.recognize(image, 'eng', {
       logger: (log) => {
         setStatus(log.status);
@@ -69,11 +71,9 @@ const App = () => {
       console.error(err);
     });
     return text!.data.text;
-  }
+  };
 
-  // Funzione principale per l'accesso alla fotocamera e il rilevamento del testo
-  async function main() {
-    // while (true) {
+  const start = async () => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
     if (canvas && video) {
@@ -81,20 +81,15 @@ const App = () => {
       canvas.height = video.videoHeight;
       canvas.getContext('2d')!.drawImage(video, 0, 0, canvas.width, canvas.height);
       const image = canvas.toDataURL();
-
-      // Rileva il testo nell'immagine
       const text = await detectText(image);
       setCaptured((arr) => [text, ...arr]);
     }
-
-    //   await new Promise((resolve) => setTimeout(resolve, 1000));
-    // }
-  }
+  };
   return (
     <div className="App">
       <header className="App-header">
         <div className="info">
-          <p>Status: {status}</p>
+          <p className="status">Status: {status}</p>
           <select>
             {cameras.map((camera, key) => (
               <option key={key} onClick={() => changeCamera(camera.id)}>
@@ -104,16 +99,16 @@ const App = () => {
           </select>
           <progress value={progress} />
         </div>
-        <button onClick={main}>Capture</button>
+        <button onClick={start}>Capture</button>
         <div className="wrap">
-          <video ref={videoRef}></video>
-          <canvas ref={canvasRef}></canvas>
+          <video className="media" ref={videoRef}></video>
+          <canvas className="media" ref={canvasRef}></canvas>
         </div>
 
         <h4 className="last">{captured[0]}</h4>
 
         <div className="capturedWrap">
-          {captured.map((value, key) => {
+          {captured.slice(1).map((value, key) => {
             return (
               <p key={key} className="captured">
                 {value}

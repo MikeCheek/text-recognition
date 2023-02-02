@@ -15,18 +15,38 @@
 
 .info {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 80%;
+}
+
+@media screen and (min-width: 768px) {
+  .info {
+    flex-direction: row;
+  }
+}
+
+.status {
+  width: 30%;
+  font-size: 1rem;
 }
 
 .wrap {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-height: 50%;
+}
+@media screen and (min-width: 768px) {
+  .wrap {
+    flex-direction: row;
+  }
+}
+
+.media {
+  max-height: 60vh;
+  max-width: 40%;
 }
 
 .capturedWrap {

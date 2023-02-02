@@ -38,16 +38,18 @@ const App = () => {
   }, [selected]);
 
   useEffect(() => {
-    if (cameras.length > 0) setSelected(cameras[0].id);
+    if (cameras.length > 0) changeCamera(cameras[0].id);
   }, [cameras]);
 
   const gotDevices = (mediaDevices: MediaDeviceInfo[]) => {
     let count = 1;
+    setCameras([]);
     mediaDevices.forEach((mediaDevice) => {
       if (mediaDevice.kind === 'videoinput')
         setCameras((arr) => [...arr, { name: mediaDevice.label || `Camera ${count++}`, id: mediaDevice.deviceId }]);
     });
   };
+
   const stopMediaTracks = (s: MediaStream) => {
     s.getTracks().forEach((track) => {
       track.stop();
@@ -64,11 +66,13 @@ const App = () => {
   const detectText = async (image: string) => {
     const text = await Tesseract.recognize(image, 'eng', {
       logger: (log) => {
+        console.log(log);
         setStatus(log.status);
         setProgress(log.progress);
       },
     }).catch((err) => {
       console.error(err);
+      setStatus(err);
     });
     return text!.data.text;
   };
@@ -86,37 +90,36 @@ const App = () => {
     }
   };
   return (
-    <div className="App">
-      <header className="App-header">
-        <div className="info">
-          <p className="status">Status: {status}</p>
-          <select>
-            {cameras.map((camera, key) => (
-              <option key={key} onClick={() => changeCamera(camera.id)}>
-                {camera.name}
-              </option>
-            ))}
-          </select>
-          <progress value={progress} />
-        </div>
-        <button onClick={start}>Capture</button>
-        <div className="wrap">
-          <video className="media" ref={videoRef}></video>
-          <canvas className="media" ref={canvasRef}></canvas>
-        </div>
+    <div className="app">
+      <progress className="progress" value={progress} />
+      <p className="status">Status: {status}</p>
+      <div className="info">
+        <select onChange={(elem) => changeCamera(elem.currentTarget.value)}>
+          {cameras.map((camera, key) => (
+            <option key={key}>{camera.name}</option>
+          ))}
+        </select>
+      </div>
+      <div className="wrap">
+        <video className="media" ref={videoRef}></video>
+        <canvas className="media" ref={canvasRef}></canvas>
+      </div>
 
-        <h4 className="last">{captured[0]}</h4>
+      <button onClick={start} className="captureButton">
+        Capture
+      </button>
 
-        <div className="capturedWrap">
-          {captured.slice(1).map((value, key) => {
-            return (
-              <p key={key} className="captured">
-                {value}
-              </p>
-            );
-          })}
-        </div>
-      </header>
+      <h4 className="last">{captured[0]}</h4>
+
+      <div className="capturedWrap">
+        {captured.slice(1).map((value, key) => {
+          return (
+            <p key={key} className="captured">
+              {value}
+            </p>
+          );
+        })}
+      </div>
     </div>
   );
 };

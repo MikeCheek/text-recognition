@@ -1,16 +1,19 @@
-.App {
-  text-align: center;
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.app {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  margin: 0;
+}
+
+.progress {
+  position: absolute;
+  top: 0;
+  border-radius: 0;
+  width: 100%;
+  height: 8px;
 }
 
 .info {
@@ -19,6 +22,7 @@
   align-items: center;
   justify-content: space-around;
   width: 80%;
+  margin-top: 50px;
 }
 
 @media screen and (min-width: 768px) {
@@ -28,8 +32,10 @@
 }
 
 .status {
-  width: 30%;
   font-size: 1rem;
+  position: absolute;
+  left: 5px;
+  top: 5px;
 }
 
 .wrap {
@@ -37,16 +43,41 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  height: 50vh;
+  width: 70%;
 }
 @media screen and (min-width: 768px) {
   .wrap {
     flex-direction: row;
+    width: 50%;
   }
 }
 
 .media {
-  max-height: 60vh;
-  max-width: 40%;
+  max-height: 50vh;
+  max-width: 70%;
+}
+
+@media screen and (min-width: 768px) {
+  .media {
+    max-width: 50%;
+  }
+}
+
+.captureButton {
+  padding: 10px 15px;
+  background-color: #004c30;
+  border: none;
+  font-size: 1.3rem;
+  color: #ecccec;
+  border-radius: 5px;
+  margin: 10px 0;
+  border: 2px solid #ececec;
+  cursor: pointer;
+  transition: transform 100ms ease;
+}
+.captureButton:hover {
+  transform: scale(1.05);
 }
 
 .capturedWrap {
@@ -54,9 +85,12 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 0 20%;
   align-items: center;
   justify-content: center;
+  padding: 10px 15px;
+  border-radius: 10px;
+  border: 2px solid white;
+  width: 80%;
 }
 
 .captured {
@@ -69,6 +103,7 @@
 .last {
   padding: 5px 10px;
   border-radius: 5px;
-  background-color: #cc2c34;
+  background-color: #12c3ce;
+  font-size: 1.5rem;
 }
 
